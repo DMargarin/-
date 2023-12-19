@@ -1,0 +1,1087 @@
+#include <iostream>
+#include <queue>
+#include <bits/stdc++.h>
+#include <string>
+
+using namespace std;
+
+int x;
+int y = 2;
+string dictionary, buffer, input;
+int i = 0;
+int CheckCounter = 0;
+int Skip = 0;
+int Byte = 8;
+int MatchIndex = 0;
+bool MatchIndexFound;
+bool MatchFound = false;
+bool MatchFound1;
+
+
+//-----------------------------------------------------------------------------------------------
+class BSTNode {
+public:
+    int data;
+    BSTNode* left;
+    BSTNode* right;
+
+    BSTNode(int value) {
+        data = value;
+        left = nullptr;
+        right = nullptr;
+    }
+};
+
+class BST {
+private:
+    BSTNode* root;
+
+    BSTNode* insertNode(BSTNode* node, int value) {
+        if (node == nullptr) {
+            return new BSTNode(value);
+        } else {
+            if (value <= node->data) {
+                node->left = insertNode(node->left, value);
+            } else {
+                node->right = insertNode(node->right, value);
+            }
+            return node;
+        }
+    }
+
+    BSTNode* findMinValueNode(BSTNode* node) {
+        if (node->left == nullptr) {
+            return node;
+        } else {
+            return findMinValueNode(node->left);
+        }
+    }
+
+    BSTNode* deleteNode(BSTNode* node, int value) {
+        if (node == nullptr) {
+            return node;
+        } else if (value < node->data) {
+            node->left = deleteNode(node->left, value);
+        } else if (value > node->data) {
+            node->right = deleteNode(node->right, value);
+        } else {
+            if (node->left == nullptr && node->right == nullptr) {
+                delete node;
+                node = nullptr;
+            } else if (node->left == nullptr) {
+                BSTNode* temp = node;
+                node = node->right;
+                delete temp;
+            } else if (node->right == nullptr) {
+                BSTNode* temp = node;
+                node = node->left;
+                delete temp;
+            } else {
+                BSTNode* temp = findMinValueNode(node->right);
+                node->data = temp->data;
+                node->right = deleteNode(node->right, temp->data);
+            }
+        }
+        return node;
+    }
+
+    void inOrderTraversal(BSTNode* node) {
+        if (node != nullptr) {
+            inOrderTraversal(node->left);
+            cout << node->data << " ";
+            inOrderTraversal(node->right);
+        }
+    }
+
+public:
+    BST() {
+        root = nullptr;
+    }
+
+    void insert(int value) {
+        root = insertNode(root, value);
+    }
+
+    void remove(int value) {
+        root = deleteNode(root, value);
+    }
+
+    bool search(int value) {
+        BSTNode* node = root;
+        while (node != nullptr) {
+            if (value == node->data) {
+                return true;
+            } else if (value < node->data) {
+                node = node->left;
+            } else {
+                node = node->right;
+            }
+        }
+        return false;
+    }
+
+    void breadthFirstTraversal() {
+        if (root == nullptr) {
+            return;
+        }
+
+        queue<BSTNode*> q;
+        q.push(root);
+
+        while (!q.empty()) {
+            BSTNode* node = q.front();
+            cout << node->data << " ";
+            q.pop();
+
+            if (node->left != nullptr) {
+                q.push(node->left);
+            }
+            
+            if (node->right != nullptr) {
+                q.push(node->right);
+            }
+        }
+    }
+
+    void inOrderTraversal() {
+        inOrderTraversal(root);
+    }
+};
+
+
+struct node {
+
+ 
+
+    // для хранения символа
+
+    string sym;
+
+ 
+
+    // для хранения вероятности или частоты
+
+    float pro;
+
+    int arr[20];
+
+    int top;
+
+} p[20];
+
+ 
+
+typedef struct node node;
+
+ 
+
+// функция для поиска кода Шеннона
+
+void shannon(int l, int h, node p[])
+
+{
+
+    float pack1 = 0, pack2 = 0, diff1 = 0, diff2 = 0;
+
+    int i, d, k, j;
+
+    if ((l + 1) == h || l == h || l > h) {
+
+        if (l == h || l > h)
+
+            return;
+
+        p[h].arr[++(p[h].top)] = 0;
+
+        p[l].arr[++(p[l].top)] = 1;
+
+        return;
+
+    }
+
+    else {
+
+        for (i = l; i <= h - 1; i++)
+
+            pack1 = pack1 + p[i].pro;
+
+        pack2 = pack2 + p[h].pro;
+
+        diff1 = pack1 - pack2;
+
+        if (diff1 < 0)
+
+            diff1 = diff1 * -1;
+
+        j = 2;
+
+        while (j != h - l + 1) {
+
+            k = h - j;
+
+            pack1 = pack2 = 0;
+
+            for (i = l; i <= k; i++)
+
+                pack1 = pack1 + p[i].pro;
+
+            for (i = h; i > k; i--)
+
+                pack2 = pack2 + p[i].pro;
+
+            diff2 = pack1 - pack2;
+
+            if (diff2 < 0)
+
+                diff2 = diff2 * -1;
+
+            if (diff2 >= diff1)
+
+                break;
+
+            diff1 = diff2;
+
+            j++;
+
+        }
+
+        k++;
+
+        for (i = l; i <= k; i++)
+
+            p[i].arr[++(p[i].top)] = 1;
+
+        for (i = k + 1; i <= h; i++)
+
+            p[i].arr[++(p[i].top)] = 0;
+
+ 
+
+        // Вызов функции Шеннона
+
+        shannon(l, k, p);
+
+        shannon(k + 1, h, p);
+
+    }
+
+}
+
+ 
+
+// Функция сортировки символов на основе их вероятности или частоты
+
+void sortByProbability(int n, node p[])
+
+{
+
+    int i, j;
+
+    node temp;
+
+    for (j = 1; j <= n - 1; j++) {
+
+        for (i = 0; i < n - 1; i++) {
+
+            if ((p[i].pro) > (p[i + 1].pro)) {
+
+                temp.pro = p[i].pro;
+
+                temp.sym = p[i].sym;
+
+ 
+
+                p[i].pro = p[i + 1].pro;
+
+                p[i].sym = p[i + 1].sym;
+
+ 
+
+                p[i + 1].pro = temp.pro;
+
+                p[i + 1].sym = temp.sym;
+
+            }
+
+        }
+
+    }
+
+}
+
+ 
+
+// функция отображения кодов Шеннона
+
+void display(int n, node p[])
+
+{
+
+    int i, j;
+
+    cout << "\n\n\n\tСимвол\tВероятность\tКод";
+
+    for (i = n - 1; i >= 0; i--) {
+
+        cout << "\n\t" << p[i].sym << "\t\t" << p[i].pro << "\t";
+
+        for (j = 0; j <= p[i].top; j++)
+
+            cout << p[i].arr[j];
+
+    }
+
+}
+
+//------------------------------------------------------------------------------------------------------
+
+struct MinHeapNode { 
+
+  
+
+
+
+    char data; 
+
+  
+
+
+
+    unsigned freq; 
+
+  
+
+
+
+    MinHeapNode *left, *right; 
+
+  
+
+    MinHeapNode(char data, unsigned freq) 
+
+  
+
+    { 
+
+  
+
+        left = right = NULL; 
+
+        this->data = data; 
+
+        this->freq = freq; 
+
+    } 
+
+}; 
+
+  
+
+// Для сравнения двух узлов кучи
+
+struct compare { 
+
+  
+
+    bool operator()(MinHeapNode* l, MinHeapNode* r) 
+
+  
+
+    { 
+
+        return (l->freq > r->freq); 
+
+    } 
+
+}; 
+
+  
+
+// Печатает коды Хаффмана из корня дерева Хаффмана.
+
+void printCodes(struct MinHeapNode* root, string str) 
+
+{ 
+
+  
+
+    if (!root) 
+
+        return; 
+
+  
+
+    if (root->data != '$') 
+
+        cout << root->data << ": " << str << "\n"; 
+
+  
+
+    printCodes(root->left, str + "0"); 
+
+    printCodes(root->right, str + "1"); 
+
+} 
+
+  
+
+// Основная функция, которая строит дерево Хаффмана и печатает коды, проходя по построенному дереву Хаффмана
+
+void HuffmanCodes(char data[], int freq[], int size) 
+
+{ 
+
+    struct MinHeapNode *left, *right, *top; 
+
+  
+
+
+
+    priority_queue<MinHeapNode*, vector<MinHeapNode*>, 
+
+                   compare> 
+
+        minHeap; 
+
+  
+
+    for (int i = 0; i < size; ++i) 
+
+        minHeap.push(new MinHeapNode(data[i], freq[i])); 
+
+  
+
+
+
+    while (minHeap.size() != 1) { 
+
+  
+
+ 
+
+        left = minHeap.top(); 
+
+        minHeap.pop(); 
+
+  
+
+        right = minHeap.top(); 
+
+        minHeap.pop(); 
+
+  
+
+
+
+        top = new MinHeapNode('$', 
+
+                              left->freq + right->freq); 
+
+  
+
+        top->left = left; 
+
+        top->right = right; 
+
+  
+
+        minHeap.push(top); 
+
+    } 
+
+  
+
+// Распечатываем коды Хаффмана, используя дерево Хаффмана, построенное выше 
+
+    printCodes(minHeap.top(), ""); 
+
+} 
+
+//------------------------------------------------------------------------------------------------------
+
+
+int main()
+{
+    
+    BST binaryTree;
+    int** arr = new int*[x];
+    float total = 0;
+    string ch;
+    node temp;
+    float d[] = { 0.22, 0.28, 0.15, 0.30, 0.05 };
+    int Count = 1;
+    
+    int g;
+    
+    
+   int w = 5;
+    
+    while(w > 0){
+        
+        cout << "-------------------------------------------------------------------------------" << endl;
+        cout << endl;
+        cout << "Пожалуйста, выберите нужную операцию. (1/2/3/4/5)" << endl;
+        cout << endl;
+        cout << "/ 1 / - Cписок смежности, матрица смежности, матрица инцидентности" << endl;
+        cout << "/ 2 / - Бинарное дерево поиска" << endl; 
+        cout << "/ 3 / - Метод Шеннона-Фано и Хаффмена" << endl; 
+        cout << "/ 4 / - Алгоритмы LZ77, LZ78, LZSS" << endl; 
+        cout << "/ 5 / - Закончить работу" << endl;
+        cout << "-------------------------------------------------------------------------------" << endl;
+        cin >> g;
+        switch(g)
+    {
+        
+        case 1:
+        cout << "Введите количество рёбер: " << endl;
+    
+        cin >> x;
+        cout << endl;
+    
+        cout << "Задайте значения рёбрам: " << endl;
+        cout << endl;
+    
+    
+    
+        
+    
+        for (int i = 0; i < x; i++) {
+            arr[i] = new int[y];
+        }    
+    
+    
+    
+        for (int i = 0; i < x; i++)
+        {
+            cout << i + 1 << " ребро:" << endl;
+            for (int j = 0; j < y; j++)
+            {
+                
+                cout << "[" << i << "][" << j << "]: " << endl;
+                cin >> arr[i][j];
+                
+            }
+            cout << endl;
+        }
+        cout << endl;
+    
+    
+    
+        for (int i = 0; i < x; i++)
+        {
+            for (int j = 0; j < y; j++)
+            {
+                cout << " arr[" << i << "," << j << "]: " << arr[i][j] << endl;
+            }
+            cout << endl;
+    
+        }
+        
+        
+        cout << "Укажите количество вершин: " << endl;
+        int V;
+        cin >> V;
+    
+    
+    
+        cout << "Ввыберите ориентированный или неориентированый граф (1/2): " << endl;
+        
+        int ch;
+        cin >> ch;
+
+    
+        switch (ch)
+        {
+        case 1: //ориентированный
+        
+            cout << endl;
+            cout << "Список смежности:" << endl;
+            cout << endl;
+        
+            for (int i = 0; i < V; i++) //cписок
+            {
+                cout << i << " -> ";
+                for (int j = 0; j < x; j++)
+                {
+                    if (arr[j][0] == i)
+                    {
+                        cout << arr[j][1] << " ";
+                    }
+                }
+                cout << endl;
+            }
+    
+            cout << endl;
+            cout << "Матрица смежности:" << endl;
+            cout << endl;
+            
+            for (int i = 0; i < V; i++) //матрица смежности
+            {
+                cout << "\t" << i;
+            }
+            cout << endl;
+    
+            for (int i = 0; i < V; i++) // вертикаль
+            {
+                cout << i << "\t";
+                for (int j = 0; j < V; j++) // горизонталь
+                {
+                    int k = 0;
+                    for (int h = 0; h < x; h++)
+                    {
+                        if ((i == arr[h][0]) and (j == arr[h][1])) { k++; }
+                    }
+                    cout << k << "\t";
+                }
+                cout << endl;
+            }
+    
+          
+            cout << endl;
+            cout << "Матрица инцидентности:" << endl;
+            cout << endl;
+            
+            cout << "\t";
+            for (int i = 0; i < x; i++) //матрица инцидентности
+            {
+                cout << arr[i][0] << "-" << arr[i][1] << "\t";
+            }
+    
+            cout << endl;
+            for (int i = 0; i < V; i++) // вертикаль
+            {
+                cout << i << "\t";
+                for (int j = 0; j < x; j++) // горизонталь
+                {
+                    int k = 0;
+                    if (arr[j][0] == i) { k = 1; }
+                    else if (arr[j][1] == i) { k = -1; }
+                    if (ch == 2) { k *= k; }
+                    cout << k << "\t";
+                }
+                cout << endl;
+            }
+    
+            break;
+            
+        case 2: //неориентированный
+            
+            cout << endl;
+            cout << "Список смежности:" << endl;
+            cout << endl;
+        
+            for (int i = 0; i < V; i++) //cписок
+            {
+                cout << i << " : ";
+                for (int j = 0; j < x; j++)
+                {
+                    if (arr[j][0] == i)
+                    {
+                        cout << arr[j][1] << " ";
+                    }
+                    if (arr[j][1] == i)
+                    {
+                        cout << arr[j][0] << " ";
+                    }
+                }
+                cout << endl;
+            }
+            
+            cout << endl;
+            cout << "Матрица смежности:" << endl;
+            cout << endl;
+            
+            for (int i = 0; i < V; i++) //матрица смежности
+            {
+                cout << "\t" << i;
+            }
+            cout << endl;
+            for (int i = 0; i < V; i++) // вертикаль
+            {
+                cout << i << "\t";
+                for (int j = 0; j < V; j++) // горизонталь
+                {
+                    int k = 0;
+                    for (int h = 0; h < x; h++)
+                    {
+                        if ((i == arr[h][0]) and (j == arr[h][1])) { k++; }
+                        if ((i == arr[h][1]) and (j == arr[h][0])) { k++; }
+                    }
+                    cout << k << "\t";
+                }
+                cout << endl;
+            }
+    
+            cout << endl;
+            cout << "Матрица инцидентности:" << endl;
+            cout << endl;
+    
+            cout << ("\t");
+            for (int i = 0; i < x; i++) //матрица инцидентности
+            {
+                cout << arr[i][0] << "-" << arr[i][1] << "\t";
+            }
+    
+            cout << endl;
+            for (int i = 0; i < V; i++) // вертикаль
+            {
+                cout << i << "\t";
+                for (int j = 0; j < x; j++) // горизонталь
+                {
+                    int k = 0;
+                    if (arr[j][0] == i) { k = 1; }
+                    else if (arr[j][1] == i) { k = 1; }
+                    cout << k << "\t";
+                }
+                cout << endl;
+            }
+            break;
+        }
+    
+        break;
+    
+        case 2:
+            
+
+             binaryTree.insert(50);
+             binaryTree.insert(30);
+             binaryTree.insert(20);
+             binaryTree.insert(40);
+             binaryTree.insert(70);
+             binaryTree.insert(60);
+             binaryTree.insert(80);
+            
+             cout << "Обход в глубину: ";
+             binaryTree.inOrderTraversal();
+             cout << endl;
+            
+             cout << "Обход в ширину: ";
+             binaryTree.breadthFirstTraversal();
+             cout << endl;
+            
+             cout << "Поиск 40: " << binaryTree.search(40) << endl;
+             cout << "Поиск 90: " << binaryTree.search(90) << endl;
+            
+             binaryTree.remove(20);
+            
+             cout << "Обход в глубину после удаления 20: ";
+             binaryTree.inOrderTraversal();
+             cout << endl;
+            
+             
+           
+        break;
+        
+        case 3:
+            
+            
+            int u;
+            cout << "1. Метод Шеннона-Фано" << endl;
+            cout << "2. Метод Хаффмена" << endl;
+            cin >> u;
+            switch(u){
+            
+            case 1:
+            int n, i, j;
+        
+        
+            //Задаем количество символов
+        
+            cout << "Количество символов: ";
+        
+            n = 5;
+        
+            cout << n << endl;
+        
+         
+        
+            //Задаем символы
+        
+            for (i = 0; i < n; i++) {
+        
+                cout << "Символ " << i + 1 << " : ";
+        
+                ch = (char)(65 + i);
+        
+                cout << ch << endl;
+        
+         
+        
+                // Вставка символа в узел
+        
+                p[i].sym += ch;
+        
+            }
+        
+         
+        
+            // Задаем вероятность символов
+        
+
+        
+            for (i = 0; i < n; i++) {
+        
+                cout << "\nВероятность " << p[i].sym << " : ";
+        
+                cout << d[i] << endl;
+        
+         
+        
+                // Вставка значения в узел
+        
+                p[i].pro = d[i];
+        
+                total = total + p[i].pro;
+        
+         
+        
+                // проверка максимальной вероятности
+        
+                if (total > 1) {
+        
+                    cout << "Неверно, введите другие значения";
+        
+                    total = total - p[i].pro;
+        
+                    i--;
+        
+                }
+        
+            }
+        
+         
+        
+            p[i].pro = 1 - total;
+        
+         
+        
+            // Сортировка символов по вероятности или частоте
+        
+            sortByProbability(n, p);
+        
+         
+        
+            for (i = 0; i < n; i++)
+        
+                p[i].top = -1;
+        
+         
+        
+            // Поиск кода Шеннона
+        
+            shannon(0, n - 1, p);
+        
+         
+        
+            // Отображение кодов
+        
+            display(n, p);
+        break;
+        
+        case 2:
+        
+            char arr[] = { 'a', 'b', 'c', 'd', 'e', 'f' }; 
+            int freq[] = { 5, 9, 12, 13, 16, 45 }; 
+            int size = sizeof(arr) / sizeof(arr[0]); 
+            HuffmanCodes(arr, freq, size);
+            
+        break;
+        }
+       
+        
+        break;
+                
+        case 4:
+                
+                int y;
+                cout << "Пожалуйста, выберите один из алгоритмов (1/2/3)" << endl;
+                cout << "1. LZ77" << endl;
+                cout << "2. LZ78" << endl;
+                cout << "3. LZSS" << endl;
+                cin >> y;
+                
+                switch(y){
+                
+                    case 1:
+                    dictionary.resize(8);
+                    buffer.resize(5);
+                    input = "БОЛЬШАЯ УДАЧА";
+                    for (int i = 0; i < buffer.length() - 1; i++)
+                    {
+                        input += " ";
+                    }
+                    dictionary = "********";
+                    for (int i = 0; i < 5; i++) {
+                        buffer[i] = input[i];
+                    }
+                
+                    cout << "Словарь\t" << "Буффер\t" << "Код" << endl;
+                    cout << dictionary << "\t" << buffer << "  ";
+                
+                
+                    for (int i = 0; i < input.length() - 5; i++) {
+                        MatchFound = false;
+                        for (int Check = 0; Check < dictionary.length(); Check++) {
+                            if (dictionary[Check] == buffer[0]) {
+                                MatchFound = true;
+                                if (Skip == 0)
+                                    MatchIndex = Check;
+                            }
+                
+                
+                
+                        }
+                
+                
+                        if (i == (input.length() - 6))
+                            MatchFound = false;
+                
+                
+                        if (MatchFound == true)
+                            Skip++;
+                
+                        for (int step = 0; step < 7; step++) {
+                            dictionary[step] = dictionary[step + 1];
+                            if (step == 6) {
+                                dictionary[step + 1] = buffer[0];
+                            }
+                        }
+                        if (MatchFound == false) {
+                            cout << MatchIndex << " " << Skip << " " << buffer[0] << endl;
+                            cout << dictionary << "\t";
+                            Skip = 0;
+                            MatchIndex = 0;
+                        }
+                
+                
+                
+                        for (int step = 0; step < 4; step++) {
+                            buffer[step] = buffer[step + 1];
+                            if (step == 3) {
+                                buffer[step + 1] = input[i + 5];
+                
+                                if (MatchFound == false) {
+                                    cout << buffer << "  ";
+                
+                
+                                }
+                            }
+                
+                        }
+                    }
+                    cout << "" << 0 << " " << 0 << " " << buffer[0];
+                    break;
+                    
+                    case 2:
+                        input = "БОЛЬШАЯ УДАЧА";
+	                    buffer.resize(input.length());
+	                    
+                    
+	                    cout << "Словарь\tКод\tПозиция в словаре" << endl;
+	                    cout << "\t\t0" << endl;
+	                    for (int i = 0; i < input.length(); i++)
+	                    	
+	                    {
+	                    	char Match = ' ';
+	                    	int MatchIndex = -1;
+	                    	for (int Check = 0; Check < buffer.length(); Check++) {
+	                    		if (input[i] == buffer[Check]) {
+	                    			MatchIndex = Check;
+	                    			Match = buffer[Check];
+	                    			break;
+	                    		}
+	                    	}
+	                    	if (MatchIndex == -1) {
+	                    		buffer[i] = input[i];
+	                    		cout << input[i] << "\t <0, " << input[i] << ">\t" << Count << endl;;
+	                    		Count++;
+	                    	}
+	                    	else {
+	                    		i++;
+	                    		cout << Match << input[i] <<"\t <" << MatchIndex+1 << ", " << input[i] << ">\t " << Count << endl;
+	                    		Count++;
+	                    		
+	                    	}
+	                    }
+                    break;
+                    
+                    case 3:
+                        dictionary.resize(8);
+                        buffer.resize(5);
+                        input = "БОЛЬШАЯ УДАЧА";
+                        dictionary = "********";
+                        for (int i = 0; i < buffer.length(); i++) {
+                            input+=" ";
+                        }
+                        for (int i = 0; i < 5; i++) {
+                            buffer[i] = input[i];
+                        }
+                    
+                        cout << "Словарь\t" << "Буффер\t" << "Код\t"<<"Длина кода" << endl;
+                        cout<<dictionary << "\t" << buffer<<"  "<< "0 " << buffer[0]<<" "<<Byte+1<< endl;;
+                        
+                    
+                    
+                    
+                        for (int i = 0; i < input.length() - 6; i++) {
+                            Byte = 8;
+                            MatchIndex = -1;
+                            MatchIndexFound = false;
+                    
+                            for (int step = 0; step < 7; step++) {
+                                dictionary[step] = dictionary[step + 1];
+                                if (step == 6) {
+                                    dictionary[step + 1] = buffer[0];
+                                }
+                            }
+                    
+                            for (int step = 0; step < 4; step++) {
+                                buffer[step] = buffer[step + 1];
+                                if (step == 3) {
+                                    buffer[step + 1] = input[i + 5];
+                                }
+                    
+                            }
+                            if (buffer[0] != dictionary[0]) {
+                                cout << dictionary << "\t" << buffer<<"  ";
+                                MatchFound1 = false;
+                                for (int Check1 = 0; Check1 < dictionary.length(); Check1++) {
+                                    if (dictionary[Check1] == buffer[0]) {
+                                        MatchIndex = Check1;
+                                        break;
+                                    }
+                                }
+            
+            
+            
+                                if (MatchIndex != -1)
+                                    cout << "1<" << MatchIndex << " " <<"1> " << Byte - 1 << endl;
+                                else cout << "0 " << buffer[0]<<" "<<Byte+1<< endl;
+                    
+                            }
+                            if (buffer[0] == dictionary[0] && MatchFound1 == false) {
+                                for (int Check1 = 0; Check1 < buffer.length(); Check1++)
+                                {
+                                    if (buffer[Check1] == dictionary[Check1])
+                                        Skip++;
+                                    else break;
+                                }
+                                MatchFound1 = true;
+                                MatchIndex = 0;
+                                cout << dictionary << "\t" << buffer<<"  1<"<<MatchIndex<< " " << Skip<<"> "<< Byte - 1 << endl;
+                                Skip = 0;
+                            }
+                    
+                        }
+                    break;
+            }
+        break;
+        
+        case 5:
+            w = false;
+        break;
+        }
+
+    }
+        
+}
